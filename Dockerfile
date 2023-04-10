@@ -1,11 +1,11 @@
-FROM node:16-bullseye-slim as deps
+FROM node:16-bullseye as deps
 WORKDIR /app
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && \
     apt-get install -y --no-install-recommends libsqlite3-dev python3 build-essential && \
-    yarn config set python /usr/bin/python3
+    npm config set python /usr/bin/python3
 
 COPY package.json .
 COPY package-lock.json .
@@ -38,10 +38,14 @@ RUN npm run build-backend
 
 
 
-FROM node:current-alpine
+FROM node:16-bullseye
 WORKDIR /app
 
-RUN apk add git ffmpeg
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && \
+    apt-get install -y --no-install-recommends git ffmpeg libsqlite3-dev python3 build-essential && \
+    npm config set python /usr/bin/python3
 
 COPY --from=deps /app/node_modules node_modules
 COPY --from=deps /app/package.json .
