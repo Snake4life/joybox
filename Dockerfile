@@ -1,7 +1,7 @@
 FROM alpine:3.12 as deps
 WORKDIR /app
 
-RUN apk add python3 g++ make
+RUN apk add npm python3 g++ make
 
 COPY package.json .
 COPY package-lock.json .
@@ -37,7 +37,7 @@ RUN npm run build-backend
 FROM alpine:3.12
 WORKDIR /app
 
-RUN apk add git ffmpeg
+RUN apk add npm git ffmpeg
 
 COPY --from=deps /app/node_modules node_modules
 COPY --from=deps /app/package.json .
