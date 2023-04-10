@@ -1,4 +1,4 @@
-FROM node:current-alpine as deps
+FROM node:18-alpine as deps
 WORKDIR /app
 
 RUN apk add python3 g++ make
