@@ -1,11 +1,7 @@
-FROM node:16 as deps
+FROM alpine:3.12 as deps
 WORKDIR /app
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && \
-    apt-get install -y --no-install-recommends libsqlite3-dev python3 build-essential && \
-    npm config set python /usr/bin/python3
+RUN apk add python3 g++ make
 
 COPY package.json .
 COPY package-lock.json .
@@ -27,6 +23,7 @@ COPY .eslintrc.js ./
 
 RUN npm run build-frontend
 
+
 FROM deps as backend
 WORKDIR /app
 
@@ -35,14 +32,12 @@ COPY Shared ./Shared
 
 RUN npm run build-backend
 
-FROM node:16
+
+
+FROM alpine:3.12
 WORKDIR /app
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && \
-    apt-get install -y --no-install-recommends git ffmpeg libsqlite3-dev python3 build-essential && \
-    npm config set python /usr/bin/python3
+RUN apk add git ffmpeg
 
 COPY --from=deps /app/node_modules node_modules
 COPY --from=deps /app/package.json .
