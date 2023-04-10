@@ -1,4 +1,4 @@
-FROM node:16-bullseye as deps
+FROM node:16 as deps
 WORKDIR /app
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -27,7 +27,6 @@ COPY .eslintrc.js ./
 
 RUN npm run build-frontend
 
-
 FROM deps as backend
 WORKDIR /app
 
@@ -36,9 +35,7 @@ COPY Shared ./Shared
 
 RUN npm run build-backend
 
-
-
-FROM node:16-bullseye
+FROM node:16
 WORKDIR /app
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
