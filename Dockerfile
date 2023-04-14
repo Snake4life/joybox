@@ -1,4 +1,4 @@
-FROM node:18 as deps
+FROM node:16 as deps
 WORKDIR /app
 
 RUN apt-get update && apt-get full-upgrade -yqq && apt-get install build-essential cmake python3 g++ make -yqq
@@ -34,7 +34,7 @@ RUN npm run build-backend
 
 
 
-FROM node:18
+FROM node:16
 WORKDIR /app
 
 RUN apt-get update && apt-get full-upgrade -yqq && apt-get install npm git ffmpeg -yqq
