@@ -1,12 +1,12 @@
-FROM alpine:3.12 as deps
+FROM node:18 as deps
 WORKDIR /app
 
-RUN apk add npm python3 g++ make
+RUN apt-get update && apt-get full-upgrade -yqq && apt-get install build-essential cmake python3 g++ make -yqq
 
 COPY package.json .
 COPY package-lock.json .
 
-RUN npm i \
+RUN npm ci \
     && mv ./node_modules/@types/jsonstream ./node_modules/@types/JSONStream
 
 
@@ -34,10 +34,10 @@ RUN npm run build-backend
 
 
 
-FROM alpine:3.12
+FROM node:18
 WORKDIR /app
 
-RUN apk add npm git ffmpeg
+RUN apt-get update && apt-get full-upgrade -yqq && apt-get install npm git ffmpeg -yqq
 
 COPY --from=deps /app/node_modules node_modules
 COPY --from=deps /app/package.json .
