@@ -20,11 +20,11 @@ import { AppAccessType, Filter, ArchiveRecord, ClipProgressState, Playlist, Noti
 import { Config as C } from '../BootstrapConfiguration';
 import { LinkCounter } from '../Common/LinkCounter';
 import { StreamDispatcher } from '../StreamDispatcher';
-import { ClipMaker, FFMpegProgressInfo, ThumbnailGenerator } from './../Common/FFmpeg';
+import { ClipMaker, FFMpegProgressInfo, ThumbnailGenerator, ReencodingMode } from './../Common/FFmpeg';
 import { Logger } from './../Common/Logger';
 import { ObservableStream, TrackedStreamCollection } from './../Common/Types';
 import { FileSize, FindDanglingEntries, GenClipFilename, IE, NormalizeUrl, ParseObservableUrl, Rename, Timestamp } from './../Common/Util';
-import { ARCHIVE_FOLDER, JWT_PROLONGATION_TTL, JWT_TTL, THUMBNAIL_FOLDER } from './../Constants';
+import { ARCHIVE_FOLDER, INCOMPLETE_FOLDER, JWT_PROLONGATION_TTL, JWT_TTL, THUMBNAIL_FOLDER } from './../Constants';
 import { NotificationCenter } from './../Services/NotificationCenter';
 import { PluginManager } from './../Services/PluginManager';
 import { RecordingService } from './../Services/RecordingService';
@@ -172,7 +172,8 @@ export class RpcRequestHandlerImpl extends RpcRequestHandler {
       defaultAccess: C.DefaultAccess,
       storageQuota: this.settings.StorageQuota,
       instanceQuota: this.settings.InstanceQuota,
-      downloadSpeedQuota: this.settings.DownloadSpeedQuota
+      downloadSpeedQuota: this.settings.DownloadSpeedQuota,
+      remoteSeleniumUrl: this.settings.RemoteSeleniumUrl
     });
   }
 
@@ -381,7 +382,7 @@ export class RpcRequestHandlerImpl extends RpcRequestHandler {
 
   @RpcMethod('DanglingRecordsSummary', AppAccessType.VIEW_ACCESS)
   private async DanglingRecordsSummary() {
-    const entries = await this.FindDanglingEntries(ARCHIVE_FOLDER, this.KnownRecords());
+    const entries = await this.FindDanglingEntries(INCOMPLETE_FOLDER, this.KnownRecords());
     return { count: entries.length, size: entries.reduce((size, x) => x.size + size, 0) };
   }
 
@@ -420,7 +421,12 @@ export class RpcRequestHandlerImpl extends RpcRequestHandler {
 
     const destName = GenClipFilename(source);
     const dest = Path.join(ARCHIVE_FOLDER, destName);
-    const clipMaker = new ClipMaker(Path.join(ARCHIVE_FOLDER, source), begin, end, dest, reencode);
+
+    const reencodeMode = reencode ?
+      process.env.REENCODING_MODE === 'hardware' ? ReencodingMode.Hardware : ReencodingMode.Software :
+      ReencodingMode.Copy;
+
+    const clipMaker = new ClipMaker(Path.join(ARCHIVE_FOLDER, source), begin, end, dest, reencodeMode);
 
     const duration = end - begin;
     this.broadcaster.NewClipProgress({ label: destName, duration });
@@ -491,12 +497,12 @@ export class RpcRequestHandlerImpl extends RpcRequestHandler {
   @RpcMethod('RemoveDanglingRecords')
   private async RemoveDanglingRecords() {
     const unlink = Util.promisify(fs.unlink);
-    const entries = await this.FindDanglingEntries(ARCHIVE_FOLDER, this.KnownRecords());
+    const entries = await this.FindDanglingEntries(INCOMPLETE_FOLDER, this.KnownRecords());
 
     let skiped = 0;
     for (const x of entries) {
       try {
-        await unlink(Path.join(ARCHIVE_FOLDER, x.filename));
+        await unlink(Path.join(INCOMPLETE_FOLDER, x.filename));
       } catch (e) {
         ++skiped;
       }
@@ -597,6 +603,20 @@ export class RpcRequestHandlerImpl extends RpcRequestHandler {
 
     this.settings.DownloadSpeedQuota = quota;
     this.broadcaster.UpdateDownloadSpeedQuota(quota);
+  }
+
+  @RpcMethod('SetRemoteSeleniumUrl')
+  private SetRemoteSeleniumUrl(url: string) {
+    if (this.settings.RemoteSeleniumUrl === '' && url !== '') {
+      Logger.Get.Log(`Remote selenium url sets to ${url}`);
+    } else if (url === '') {
+      Logger.Get.Log('Remote selenium url was unset');
+    } else {
+      Logger.Get.Log(`Remote selenium url changed from ${this.settings.RemoteSeleniumUrl} to ${url}`);
+    }
+
+    this.settings.RemoteSeleniumUrl = url;
+    this.broadcaster.UpdateRemoteSeleniumUrl(url);
   }
 
   @RpcMethod('AttachTagToArchiveRecord')
