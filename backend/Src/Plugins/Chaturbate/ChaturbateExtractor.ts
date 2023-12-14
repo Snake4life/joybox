@@ -108,12 +108,12 @@ export class ChaturbateExtractor implements StreamExtractor {
       return false;
     }
 
-    return hostname.toLowerCase().endsWith('chaturbate.com');
+    return hostname.toLowerCase().endsWith('beeg.co');
   }
 
   private async ExtractPlaylist(url: string): Promise<string> {
     const username = UsernameFromUrl(url);
-    const response = await axios.get<RoomInfo>(`https://chaturbate.com/api/chatvideocontext/${username}/`);
+    const response = await axios.get<RoomInfo>(`https://beeg.co/api/chatvideocontext/${username}/`);
     return response.data.hls_source;
   }
 }
