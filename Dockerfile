@@ -4,7 +4,6 @@ WORKDIR /app
 RUN apt-get update && apt-get full-upgrade -yqq && apt-get install build-essential cmake python3 g++ make -yqq
 
 COPY package.json .
-COPY package-lock.json .
 
 RUN npm ci \
     && mv ./node_modules/@types/jsonstream ./node_modules/@types/JSONStream
