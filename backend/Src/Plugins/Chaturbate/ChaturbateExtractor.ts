@@ -119,11 +119,11 @@ export class ChaturbateExtractor implements StreamExtractor {
     const username = UsernameFromUrl(url);
 
     try {
-      const response = await axios.get<RoomInfo>(`https://chaturbate.com/api/chatvideocontext/${username}/`, {
+      const response = await axios.get(`https://chaturbate.com/api/chatvideocontext/${username}/`, {
         headers: {
           'User-Agent': firefoxUserAgent,
         },
-      });
+      }) as { data: RoomInfo }; // Specify the type of the response object
 
       return response.data.hls_source;
     } catch (error) {
