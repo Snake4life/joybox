@@ -5,6 +5,9 @@ import * as Url from 'url';
 import { UsernameFromUrl } from '../../Common/Util';
 import { StreamExtractor } from '../Plugin';
 
+// Define the latest Firefox user agent
+const firefoxUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0';
+
 export interface AdsZoneIds {
   '300x250, centre': string;
   '300x250, right': string;
@@ -93,6 +96,7 @@ export interface RoomInfo {
 
 export class ChaturbateExtractor implements StreamExtractor {
   private ExtractPlaylistMem = memoizee(this.ExtractPlaylist.bind(this), { maxAge: 1000, promise: true });
+
   public async Extract(url: string): Promise<string | null> {
     try {
       return await this.ExtractPlaylistMem(url);
@@ -108,12 +112,24 @@ export class ChaturbateExtractor implements StreamExtractor {
       return false;
     }
 
-    return hostname.toLowerCase().endsWith('beeg.co');
+    return hostname.toLowerCase().endsWith('chaturbate.com');
   }
 
   private async ExtractPlaylist(url: string): Promise<string> {
     const username = UsernameFromUrl(url);
-    const response = await axios.get<RoomInfo>(`https://beeg.co/api/chatvideocontext/${username}/`);
-    return response.data.hls_source;
+
+    try {
+      const response = await axios.get<RoomInfo>(`https://chaturbate.com/api/chatvideocontext/${username}/`, {
+        headers: {
+          'User-Agent': firefoxUserAgent,
+        },
+      });
+
+      return response.data.hls_source;
+    } catch (error) {
+      // Handle errors
+      console.error('Error fetching data:', error.message);
+      throw error; // Re-throw the error for the calling code to handle
+    }
   }
 }
