@@ -124,7 +124,6 @@ export class ChaturbateExtractor implements StreamExtractor {
         },
       });
     Logger.Get.Log(response);
-    Logger.Get.Log(response.data);
     return response.data.hls_source;
   }
 }
