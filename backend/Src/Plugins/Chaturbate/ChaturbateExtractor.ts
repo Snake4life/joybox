@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as memoizee from 'memoizee';
 import * as Url from 'url';
+import { ConsoleWriter, Logger, SqliteWriter } from '../../Common/Logger';
 
 import { UsernameFromUrl } from '../../Common/Util';
 import { StreamExtractor } from '../Plugin';
@@ -117,11 +118,13 @@ export class ChaturbateExtractor implements StreamExtractor {
   
   private async ExtractPlaylist(url: string): Promise<string> {
     const username = UsernameFromUrl(url);
-    const response = await axios.get<RoomInfo>(`https://beeg.co/api/chatvideocontext/${username}/`, {
+    const response = await axios.get<RoomInfo>(`https://chaturbate.com/api/chatvideocontext/${username}/`, {
         headers: {
           'User-Agent': firefoxUserAgent,
         },
       });
+    Logger.Get.Log(response);
+    Logger.Get.Log(response.data);
     return response.data.hls_source;
   }
 }
