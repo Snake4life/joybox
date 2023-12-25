@@ -5,7 +5,7 @@ RUN apt-get update && apt-get full-upgrade -yqq && apt-get install build-essenti
 
 COPY package.json .
 
-RUN npm ci \
+RUN npm i \
     && mv ./node_modules/@types/jsonstream ./node_modules/@types/JSONStream
 
 
