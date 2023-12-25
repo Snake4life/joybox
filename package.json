@@ -41,7 +41,6 @@
     "selenium-webdriver": "^4.11.1",
     "socket.io": "^2.2.0",
     "ts-bus": "^2.3.1",
-    "ts-loader": "^9.5.1",
     "vue": "^2.7.14",
     "vue-chartjs": "^3.5.1",
     "vue-class-component": "^7.1.0",
@@ -96,10 +95,12 @@
     "eslint-plugin-vue": "^6.2.2",
     "mocha": "^6.2.0",
     "ts-node": "^8.3.0",
+    "ts-loader": "^9.5.1",
     "tsconfig-paths": "^3.9.0",
     "tsconfig-paths-webpack-plugin": "^3.2.0",
-    "typescript": "^4.8.4",
-    "vue-template-compiler": "^2.7.14"
+    "typescript": "^5.3.3",
+    "vue-template-compiler": "^2.7.14",
+    "vue-loader": "^17.3.1"
   },
   "gitHooks": {
     "pre-commit": "npm test"
