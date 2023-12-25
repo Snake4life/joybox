@@ -1,11 +1,9 @@
-FROM node:16 as deps
+FROM node:18 as deps
 WORKDIR /app
 
 RUN apt-get update && apt-get full-upgrade -yqq && apt-get install build-essential cmake python3 g++ make -yqq
 
 COPY package.json .
-
-RUN npm install -g npm@10.2.5
 
 RUN npm i \
     && mv ./node_modules/@types/jsonstream ./node_modules/@types/JSONStream
@@ -35,7 +33,7 @@ RUN npm run build-backend
 
 
 
-FROM node:16
+FROM node:18
 WORKDIR /app
 
 RUN apt-get update && apt-get full-upgrade -yqq && apt-get install npm git ffmpeg -yqq
