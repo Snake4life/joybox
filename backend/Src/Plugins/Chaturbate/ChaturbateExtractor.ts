@@ -1,7 +1,6 @@
 import axios from 'axios';
 import * as memoizee from 'memoizee';
 import * as Url from 'url';
-import { ConsoleWriter, Logger, SqliteWriter } from '../../Common/Logger';
 
 import { UsernameFromUrl } from '../../Common/Util';
 import { StreamExtractor } from '../Plugin';
@@ -123,8 +122,6 @@ export class ChaturbateExtractor implements StreamExtractor {
           'User-Agent': firefoxUserAgent,
         },
       });
-    const info = response.data;
-    Logger.Get.Log(info.data.hls_source);
     return response.data.hls_source;
   }
 }
