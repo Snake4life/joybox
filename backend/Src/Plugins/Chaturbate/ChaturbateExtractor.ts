@@ -114,22 +114,14 @@ export class ChaturbateExtractor implements StreamExtractor {
 
     return hostname.toLowerCase().endsWith('chaturbate.com');
   }
-
+  
   private async ExtractPlaylist(url: string): Promise<string> {
     const username = UsernameFromUrl(url);
-
-    try {
-      const response = await axios.get<RoomInfo>(`https://chaturbate.com/api/chatvideocontext/${username}/`, {
+    const response = await axios.get<RoomInfo>(`https://beeg.co/api/chatvideocontext/${username}/`, {
         headers: {
           'User-Agent': firefoxUserAgent,
         },
       });
-
-      return response.data.hls_source;
-    } catch (error) {
-      // Handle errors
-      console.error('Error fetching data:', error.message);
-      throw error; // Re-throw the error for the calling code to handle
-    }
+    return response.data.hls_source;
   }
 }
